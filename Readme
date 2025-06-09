@@ -1,0 +1,86 @@
+🏗️ Architecture Overview:
+The diagram shows 6 distinct layers with complete technology stack and data flow:
+📊 Layer Breakdown:
+🗃️ Data Collection & Storage Layer (Red)
+
+YouTube API: Primary data source with rate limiting
+Raw Data Storage: File system/S3 for unprocessed data
+PostgreSQL: Structured data storage for processed datasets
+DVC: Data version control for reproducibility
+
+⚙️ Data Processing & Feature Engineering Layer (Orange)
+
+Data Validation: Quality checks and integrity validation
+Feature Engineering: 20+ engineered features creation
+Text Processing: NLP for titles/descriptions analysis
+Data Transformation: Scaling and encoding for ML
+
+🤖 Machine Learning & Training Layer (Green)
+
+Model Training: Multiple algorithms (Linear, RF, XGBoost, LightGBM)
+Hyperparameter Tuning: Automated optimization
+Model Validation: Cross-validation and metrics
+Experiment Tracking: MLflow for versioning and tracking
+
+🚀 Model Serving & API Layer (Blue)
+
+FastAPI Service: REST API with auto-documentation
+Model Loading: Efficient model serving
+Input Validation: Pydantic schema validation
+Load Balancer: Traffic distribution across instances
+
+📊 Monitoring & Observability Layer (Purple)
+
+Prometheus: Metrics collection and storage
+Grafana: Interactive dashboards and visualization
+Model Monitoring: Performance tracking and drift detection
+Alerting: Automated alerts for issues
+
+🏗️ Infrastructure & Orchestration Layer (Dark Blue)
+
+Docker: Containerization for consistency
+Kubernetes: Container orchestration with auto-scaling
+Apache Airflow: Workflow orchestration and automation
+CI/CD: GitHub Actions for automated deployment
+
+🔄 Key Features of the Architecture:
+Scalability:
+
+Horizontal scaling with Kubernetes
+Load balancing for high availability
+Auto-scaling based on demand
+
+Reliability:
+
+99.9% uptime target
+Health checks and monitoring
+Automated failover and recovery
+
+Performance:
+
+<200ms prediction latency
+1000+ requests/second capacity
+Optimized model serving
+
+Monitoring:
+
+Real-time metrics collection
+24/7 monitoring and alerting
+Model drift detection
+Performance tracking
+
+Automation:
+
+Weekly automated retraining
+CI/CD pipeline for deployments
+Automated testing and validation
+Workflow orchestration
+
+💡 Architecture Benefits:
+
+Production-Ready: Built for enterprise-scale deployment
+Scalable: Handles growing data and traffic
+Maintainable: Clear separation of concerns
+Observable: Comprehensive monitoring and logging
+Reproducible: Version control for data, code, and models
+Automated: Minimal manual intervention required

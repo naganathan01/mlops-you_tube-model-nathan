@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube MLOps Architecture</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+        
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+            font-size: 1.2em;
+        }
+        
+        .architecture {
+            padding: 40px;
+            background: #f8f9fa;
+        }
+        
+        .layer {
+            margin-bottom: 40px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .layer-header {
+            padding: 20px 30px;
+            font-weight: 600;
+            font-size: 1.3em;
+            color: white;
+            display: flex;
+            align-items: center;
+        }
+        
+        .layer-header i {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        
+        .data-layer { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+        .processing-layer { background: linear-gradient(135deg, #f39c12, #e67e22); }
+        .ml-layer { background: linear-gradient(135deg, #27ae60, #229954); }
+        .serving-layer { background: linear-gradient(135deg, #3498db, #2980b9); }
+        .monitoring-layer { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
+        .infrastructure-layer { background: linear-gradient(135deg, #34495e, #2c3e50); }
+        
+        .layer-content {
+            padding: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .component {
+            background: #fff;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .component:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            border-color: #3498db;
+        }
+        
+        .component h4 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+        
+        .component p {
+            margin: 0;
+            color: #6c757d;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+        
+        .component .tech {
+            background: #e9f7ef;
+            color: #27ae60;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 500;
+            display: inline-block;
+            margin: 5px 5px 0 0;
+        }
+        
+        .flow-arrows {
+            display: flex;
+            justify-content: center;
+            margin: -20px 0;
+            z-index: 10;
+            position: relative;
+        }
+        
+        .arrow {
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 20px solid #3498db;
+            margin: 0 10px;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+        
+        .data-flow {
+            background: #fff;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 40px 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .data-flow h3 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 1.5em;
+        }
+        
+        .flow-diagram {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .flow-step {
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 25px;
+            font-weight: 500;
+            text-align: center;
+            min-width: 150px;
+            position: relative;
+        }
+        
+        .flow-step::after {
+            content: '→';
+            position: absolute;
+            right: -25px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.5em;
+            color: #3498db;
+        }
+        
+        .flow-step:last-child::after {
+            display: none;
+        }
+        
+        .legend {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-top: 40px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .legend h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .legend-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        .metrics {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-top: 40px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .metrics h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .metric {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .metric-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .metric-label {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        
+        @media (max-width: 768px) {
+            .flow-diagram {
+                flex-direction: column;
+            }
+            
+            .flow-step::after {
+                content: '↓';
+                right: 50%;
+                top: 100%;
+                transform: translateX(50%);
+            }
+            
+            .layer-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎬 YouTube MLOps Architecture</h1>
+            <p>End-to-End Machine Learning Operations Pipeline</p>
+        </div>
+        
+        <div class="architecture">
+            <!-- Data Layer -->
+            <div class="layer">
+                <div class="layer-header data-layer">
+                    <i>🗃️</i> Data Collection & Storage Layer
+                </div>
+                <div class="layer-content">
+                    <div class="component">
+                        <h4>YouTube API</h4>
+                        <p>Primary data source for video metadata, statistics, and channel information</p>
+                        <span class="tech">REST API</span>
+                        <span class="tech">Rate Limited</span>
+                    </div>
+                    <div class="component">
+                        <h4>Raw Data Storage</h4>
+                        <p>Stores unprocessed data from YouTube API in CSV/JSON format</p>
+                        <span class="tech">File System</span>
+                        <span class="tech">S3</span>
+                    </div>
+                    <div class="component">
+                        <h4>PostgreSQL Database</h4>
+                        <p>Stores processed data, model metadata, and monitoring metrics</p>
+                        <span class="tech">PostgreSQL</span>
+                        <span class="tech">ACID</span>
+                    </div>
+                    <div class="component">
+                        <h4>Data Version Control</h4>
+                        <p>Tracks data versions and ensures reproducibility</p>
+                        <span class="tech">DVC</span>
+                        <span class="tech">Git</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flow-arrows">
+                <div class="arrow"></div>
+                <div class="arrow"></div>
+                <div class="arrow"></div>
+            </div>
+
+            <!-- Processing Layer -->
+            <div class="layer">
+                <div class="layer-header processing-layer">
+                    <i>⚙️</i> Data Processing & Feature Engineering Layer
+                </div>
+                <div class="layer-content">
+                    <div class="component">
+                        <h4>Data Validation</h4>
+                        <p>Validates data quality, handles missing values, and ensures data integrity</p>
+                        <span class="tech">Pandas</span>
+                        <span class="tech">Great Expectations</span>
+                    </div>
+                    <div class="component">
+                        <h4>Feature Engineering</h4>
+                        <p>Creates 20+ features including time-based, content, and engagement features</p>
+                        <span class="tech">Scikit-learn</span>
+                        <span class="tech">NumPy</span>
+                    </div>
+                    <div class="component">
+                        <h4>Text Processing</h4>
+                        <p>NLP processing for titles, descriptions, and sentiment analysis</p>
+                        <span class="tech">NLTK</span>
+                        <span class="tech">TextBlob</span>
+                    </div>
+                    <div class="component">
+                        <h4>Data Transformation</h4>
+                        <p>Scaling, encoding, and preparing data for machine learning</p>
+                        <span class="tech">Scikit-learn</span>
+                        <span class="tech">Pandas</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flow-arrows">
+                <div class="arrow"></div>
+                <div class="arrow"></div>
+                <div class="arrow"></div>
+            </div>
+
+            <!-- ML Layer -->
+            <div class="layer">
+                <div class="layer-header ml-layer">
+                    <i>🤖</i> Machine Learning & Training Layer
+                </div>
+                <div class="layer-content">
+                    <div class="component">
+                        <h4>Model Training</h4>
+                        <p>Multiple algorithms: Linear, Random Forest, XGBoost, LightGBM</p>
+                        <span class="tech">Scikit-learn</span>
+                        <span class="tech">XGBoost</span>
+                        <span class="tech">LightGBM</span>
+                    </div>
+                    <div class="component">
+                        <h4>Hyperparameter Tuning</h4>
+                        <p>Automated hyperparameter optimization with grid search</p>
+                        <span class="tech">GridSearchCV</span>
+                        <span class="tech">RandomSearchCV</span>
+                    </div>
+                    <div class="component">
+                        <h4>Model Validation</h4>
+                        <p>Cross-validation, performance metrics, and model selection</p>
+                        <span class="tech">Cross-validation</span>
+                        <span class="tech">Metrics</span>
+                    </div>
+                    <div class="component">
+                        <h4>Experiment Tracking</h4>
+                        <p>Tracks experiments, parameters, metrics, and model artifacts</p>
+                        <span class="tech">MLflow</span>
+                        <span class="tech">Model Registry</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flow-arrows">
+                <div class="arrow"></div>
+                <div class="arrow"></div>
+                <div class="arrow"></div>
+            </div>
+
+            <!-- Serving Layer -->
+            <div class="layer">
+                <div class="layer-header serving-layer">
+                    <i>🚀</i> Model Serving & API Layer
+                </div>
+                <div class="layer-content">
+                    <div class="component">
+                        <h4>FastAPI Service</h4>
+                        <p>REST API for model predictions with automatic documentation</p>
+                        <span class="tech">FastAPI</span>
+                        <span class="tech">Uvicorn</span>
+                    </div>
+                    <div class="component">
+                        <h4>Model Loading</h4>
+                        <p>Loads trained models and handles prediction requests</p>
+                        <span class="tech">Joblib</span>
+                        <span class="tech">Pickle</span>
+                    </div>
+                    <div class="component">
+                        <h4>Input Validation</h4>
+                        <p>Validates API inputs and handles data preprocessing</p>
+                        <span class="tech">Pydantic</span>
+                        <span class="tech">FastAPI</span>
+                    </div>
+                    <div class="component">
+                        <h4>Load Balancer</h4>
+                        <p>Distributes traffic across multiple API instances</p>
+                        <span class="tech">Nginx</span>
+                        <span class="tech">Kubernetes</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flow-arrows">
+                <div class="arrow"></div>
+                <div class="arrow"></div>
+                <div class="arrow"></div>
+            </div>
+
+            <!-- Monitoring Layer -->
+            <div class="layer">
+                <div class="layer-header monitoring-layer">
+                    <i>📊</i> Monitoring & Observability Layer
+                </div>
+                <div class="layer-content">
+                    <div class="component">
+                        <h4>Prometheus</h4>
+                        <p>Collects metrics from APIs, models, and infrastructure</p>
+                        <span class="tech">Prometheus</span>
+                        <span class="tech">Time Series</span>
+                    </div>
+                    <div class="component">
+                        <h4>Grafana Dashboards</h4>
+                        <p>Visualizes system metrics, model performance, and business KPIs</p>
+                        <span class="tech">Grafana</span>
+                        <span class="tech">Visualization</span>
+                    </div>
+                    <div class="component">
+                        <h4>Model Monitoring</h4>
+                        <p>Tracks model performance, drift detection, and data quality</p>
+                        <span class="tech">Custom Scripts</span>
+                        <span class="tech">Statistical Tests</span>
+                    </div>
+                    <div class="component">
+                        <h4>Alerting System</h4>
+                        <p>Sends alerts for model degradation, system failures, or anomalies</p>
+                        <span class="tech">AlertManager</span>
+                        <span class="tech">Slack/Email</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flow-arrows">
+                <div class="arrow"></div>
+                <div class="arrow"></div>
+                <div class="arrow"></div>
+            </div>
+
+            <!-- Infrastructure Layer -->
+            <div class="layer">
+                <div class="layer-header infrastructure-layer">
+                    <i>🏗️</i> Infrastructure & Orchestration Layer
+                </div>
+                <div class="layer-content">
+                    <div class="component">
+                        <h4>Docker Containers</h4>
+                        <p>Containerized applications for consistent deployment</p>
+                        <span class="tech">Docker</span>
+                        <span class="tech">Multi-stage</span>
+                    </div>
+                    <div class="component">
+                        <h4>Kubernetes Cluster</h4>
+                        <p>Orchestrates containers with auto-scaling and load balancing</p>
+                        <span class="tech">Kubernetes</span>
+                        <span class="tech">Auto-scaling</span>
+                    </div>
+                    <div class="component">
+                        <h4>Apache Airflow</h4>
+                        <p>Orchestrates ML pipelines and automates workflows</p>
+                        <span class="tech">Airflow</span>
+                        <span class="tech">DAGs</span>
+                    </div>
+                    <div class="component">
+                        <h4>CI/CD Pipeline</h4>
+                        <p>Automated testing, building, and deployment</p>
+                        <span class="tech">GitHub Actions</span>
+                        <span class="tech">pytest</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Flow Diagram -->
+        <div class="data-flow">
+            <h3>🔄 Data Flow Process</h3>
+            <div class="flow-diagram">
+                <div class="flow-step">YouTube API</div>
+                <div class="flow-step">Data Collection</div>
+                <div class="flow-step">Feature Engineering</div>
+                <div class="flow-step">Model Training</div>
+                <div class="flow-step">Model Validation</div>
+                <div class="flow-step">Deployment</div>
+                <div class="flow-step">Monitoring</div>
+            </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="legend">
+            <h3>🎨 Architecture Components Legend</h3>
+            <div class="legend-grid">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #e74c3c;"></div>
+                    <span>Data Collection & Storage</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #f39c12;"></div>
+                    <span>Data Processing & Features</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #27ae60;"></div>
+                    <span>Machine Learning & Training</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #3498db;"></div>
+                    <span>Model Serving & API</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #9b59b6;"></div>
+                    <span>Monitoring & Observability</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #34495e;"></div>
+                    <span>Infrastructure & Orchestration</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Metrics -->
+        <div class="metrics">
+            <h3>📈 Key Architecture Metrics</h3>
+            <div class="metrics-grid">
+                <div class="metric">
+                    <div class="metric-value">99.9%</div>
+                    <div class="metric-label">API Uptime</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">&lt;200ms</div>
+                    <div class="metric-label">Prediction Latency</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">1000+</div>
+                    <div class="metric-label">Requests/Second</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">Auto</div>
+                    <div class="metric-label">Scaling</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">24/7</div>
+                    <div class="metric-label">Monitoring</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">Weekly</div>
+                    <div class="metric-label">Retraining</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
