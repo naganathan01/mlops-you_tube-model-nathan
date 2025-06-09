@@ -1,0 +1,103 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: youtube_mlops
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # MLflow Tracking Server
+  mlflow:
+    image: mlflow/mlflow:latest
+    ports:
+      - "5000:5000"
+    environment:
+      - BACKEND_STORE_URI=postgresql://postgres:password@postgres:5432/youtube_mlops
+      - DEFAULT_ARTIFACT_ROOT=./mlruns
+    depends_on:
+      - postgres
+    command: >
+      mlflow server 
+      --backend-store-uri postgresql://postgres:password@postgres:5432/youtube_mlops
+      --default-artifact-root ./mlruns
+      --host 0.0.0.0
+      --port 5000
+
+  # API Service
+  api:
+    build:
+      context: ../../
+      dockerfile: deployment/docker/Dockerfile.api
+    ports:
+      - "8000:8000"
+    environment:
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/youtube_mlops
+    depends_on:
+      - postgres
+      - mlflow
+    volumes:
+      - ../../models:/app/models
+
+  # Streamlit Dashboard
+  dashboard:
+    image: python:3.9-slim
+    ports:
+      - "8501:8501"
+    volumes:
+      - ../../src:/app/src
+      - ../../dashboard.py:/app/dashboard.py
+    working_dir: /app
+    command: >
+      bash -c "pip install streamlit pandas plotly seaborn && 
+               streamlit run dashboard.py --server.port 8501 --server.address 0.0.0.0"
+
+  # Prometheus Monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+
+  # Grafana Dashboards
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+
+  # Airflow (simplified setup)
+  airflow:
+    image: apache/airflow:2.5.0
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql://postgres:password@postgres:5432/youtube_mlops
+    ports:
+      - "8080:8080"
+    volumes:
+      - ../../airflow/dags:/opt/airflow/dags
+      - ../../src:/opt/airflow/dags/src
+    depends_on:
+      - postgres
+    command: >
+      bash -c "airflow db init && 
+               airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@example.com &&
+               airflow webserver"
+
+volumes:
+  postgres_data:
+  grafana_data:
