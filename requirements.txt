@@ -1,5 +1,4 @@
-# requirements.txt
-# Data Science
+# Core Data Science
 pandas>=1.5.0
 numpy>=1.21.0
 scikit-learn>=1.1.0
@@ -9,31 +8,49 @@ matplotlib>=3.5.0
 seaborn>=0.11.0
 plotly>=5.0.0
 
-# MLOps
-mlflow>=2.0.0
-dvc>=2.0.0
-feast>=0.28.0
+# MLOps & Experiment Tracking
+mlflow>=2.8.0
+dvc[s3]>=3.0.0
+feast>=0.32.0
 
-# API & Web
-fastapi>=0.95.0
-uvicorn>=0.20.0
-streamlit>=1.20.0
-pydantic>=1.10.0
+# API & Web Services
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+streamlit>=1.28.0
+pydantic>=2.5.0
 
-# Database
+# Database & Storage
 psycopg2-binary>=2.9.0
-sqlalchemy>=1.4.0
+sqlalchemy>=2.0.0
+redis>=5.0.0
 
-# Monitoring
-prometheus-client>=0.15.0
+# Monitoring & Observability
+prometheus-client>=0.19.0
 grafana-api>=1.0.0
 
-# Workflow
-apache-airflow>=2.5.0
-celery>=5.2.0
+# Workflow Orchestration
+apache-airflow>=2.7.0
+celery>=5.3.0
 
-# Utils
-python-dotenv>=0.19.0
-requests>=2.28.0
+# Text Processing & NLP
+nltk>=3.8.0
+textblob>=0.17.0
+spacy>=3.7.0
+
+# Utilities
+python-dotenv>=1.0.0
+requests>=2.31.0
 google-api-python-client>=2.0.0
-python-multipart>=0.0.5
+python-multipart>=0.0.6
+pyyaml>=6.0.0
+click>=8.1.0
+
+# Testing
+pytest>=7.4.0
+pytest-cov>=4.1.0
+pytest-mock>=3.12.0
+
+# Development
+black>=23.0.0
+flake8>=6.1.0
+pre-commit>=3.5.0
