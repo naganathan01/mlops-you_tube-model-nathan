@@ -1,0 +1,63 @@
+stages:
+  data_collection:
+    cmd: python src/data/data_collector.py --output data/raw/youtube_trending.csv
+    deps:
+    - src/data/data_collector.py
+    outs:
+    - data/raw/youtube_trending.csv
+    params:
+    - data_collection.max_results
+    - data_collection.region_code
+
+  feature_engineering:
+    cmd: python src/data/feature_engineering.py --input data/raw/youtube_trending.csv --output data/processed/features.csv
+    deps:
+    - src/data/feature_engineering.py
+    - data/raw/youtube_trending.csv
+    outs:
+    - data/processed/features.csv
+    - data/processed/feature_columns.json
+
+  model_training:
+    cmd: python src/models/train.py --input data/processed/features.csv --output models/
+    deps:
+    - src/models/train.py
+    - data/processed/features.csv
+    outs:
+    - models/xgboost_view_count.joblib
+    - models/xgboost_like_count.joblib
+    - models/xgboost_comment_count.joblib
+    - models/feature_columns.json
+    - models/model_metadata.json
+    metrics:
+    - metrics/model_performance.json
+
+  model_evaluation:
+    cmd: python src/models/evaluate.py --model-path models/ --data-path data/processed/features.csv
+    deps:
+    - src/models/evaluate.py
+    - models/xgboost_view_count.joblib
+    - models/xgboost_like_count.joblib
+    - models/xgboost_comment_count.joblib
+    - data/processed/features.csv
+    metrics:
+    - metrics/evaluation_results.json
+
+params:
+  data_collection:
+    max_results: 1000
+    region_code: "US"
+  
+  feature_engineering:
+    text_features: true
+    time_features: true
+    engagement_features: true
+  
+  model_training:
+    test_size: 0.2
+    cv_folds: 5
+    random_state: 42
+    models:
+      - xgboost
+      - lightgbm
+      - random_forest

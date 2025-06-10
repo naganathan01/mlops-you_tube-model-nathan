@@ -1,0 +1,143 @@
+groups:
+  - name: mlops_alerts
+    rules:
+      - alert: HighAPILatency
+        expr: histogram_quantile(0.95, rate(prediction_latency_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+          service: youtube-mlops-api
+        annotations:
+          summary: "High API prediction latency"
+          description: "95th percentile latency is {{ $value }}s, above 2 seconds threshold"
+
+      - alert: LowModelAccuracy
+        expr: model_accuracy_score < 0.7
+        for: 5m
+        labels:
+          severity: critical
+          service: youtube-mlops-api
+        annotations:
+          summary: "Model accuracy below threshold"
+          description: "Model accuracy is {{ $value }}, below 70% threshold"
+
+      - alert: HighDataDrift
+        expr: data_drift_score > 0.3
+        for: 10m
+        labels:
+          severity: warning
+          service: youtube-mlops-api
+        annotations:
+          summary: "High data drift detected"
+          description: "Data drift score is {{ $value }}, above 0.3 threshold"
+
+      - alert: APIDown
+        expr: up{job="youtube-mlops-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: youtube-mlops-api
+        annotations:
+          summary: "API service is down"
+          description: "YouTube MLOps API is not responding"
+
+      - alert: HighErrorRate
+        expr: rate(api_requests_total{status=~"5.."}[5m]) / rate(api_requests_total[5m]) * 100 > 5
+        for: 5m
+        labels:
+          severity: warning
+          service: youtube-mlops-api
+        annotations:
+          summary: "High API error rate"
+          description: "API error rate is {{ $value }}%, above 5% threshold"
+
+      - alert: LowRequestVolume
+        expr: rate(api_requests_total[5m]) < 0.01
+        for: 15m
+        labels:
+          severity: info
+          service: youtube-mlops-api
+        annotations:
+          summary: "Low API request volume"
+          description: "API receiving very few requests: {{ $value }} req/sec"
+
+      - alert: DatabaseConnectionFailure
+        expr: up{job="postgres"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: postgres
+        annotations:
+          summary: "Database connection failure"
+          description: "Cannot connect to PostgreSQL database"
+
+      - alert: RedisConnectionFailure
+        expr: up{job="redis"} == 0
+        for: 2m
+        labels:
+          severity: warning
+          service: redis
+        annotations:
+          summary: "Redis connection failure"
+          description: "Cannot connect to Redis cache# 📁 Complete File Codes for MLOps Pipeline
+
+## 🔴 CRITICAL FILES (Replace/Create First)
+
+### 1. **requirements.txt** - REPLACE COMPLETELY
+```txt
+# Core Data Science
+pandas>=1.5.0
+numpy>=1.21.0
+scikit-learn>=1.1.0
+xgboost>=1.6.0
+lightgbm>=3.3.0
+matplotlib>=3.5.0
+seaborn>=0.11.0
+plotly>=5.0.0
+
+# MLOps & Experiment Tracking
+mlflow>=2.8.0
+dvc[s3]>=3.0.0
+feast>=0.32.0
+
+# API & Web Services
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+streamlit>=1.28.0
+pydantic>=2.5.0
+
+# Database & Storage
+psycopg2-binary>=2.9.0
+sqlalchemy>=2.0.0
+redis>=5.0.0
+
+# Monitoring & Observability
+prometheus-client>=0.19.0
+grafana-api>=1.0.0
+
+# Workflow Orchestration
+apache-airflow>=2.7.0
+celery>=5.3.0
+
+# Text Processing & NLP
+nltk>=3.8.0
+textblob>=0.17.0
+spacy>=3.7.0
+
+# Utilities
+python-dotenv>=1.0.0
+requests>=2.31.0
+google-api-python-client>=2.0.0
+python-multipart>=0.0.6
+pyyaml>=6.0.0
+click>=8.1.0
+
+# Testing
+pytest>=7.4.0
+pytest-cov>=4.1.0
+pytest-mock>=3.12.0
+
+# Development
+black>=23.0.0
+flake8>=6.1.0
+pre-commit>=3.5.0

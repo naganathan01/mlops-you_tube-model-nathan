@@ -3,7 +3,7 @@ version: '3.8'
 services:
   # PostgreSQL Database
   postgres:
-    image: postgres:13
+    image: postgres:15
     environment:
       POSTGRES_DB: youtube_mlops
       POSTGRES_USER: postgres
@@ -12,6 +12,24 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   # MLflow Tracking Server
   mlflow:
@@ -22,13 +40,19 @@ services:
       - BACKEND_STORE_URI=postgresql://postgres:password@postgres:5432/youtube_mlops
       - DEFAULT_ARTIFACT_ROOT=./mlruns
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     command: >
       mlflow server 
       --backend-store-uri postgresql://postgres:password@postgres:5432/youtube_mlops
       --default-artifact-root ./mlruns
       --host 0.0.0.0
       --port 5000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   # API Service
   api:
@@ -40,11 +64,22 @@ services:
     environment:
       - MLFLOW_TRACKING_URI=http://mlflow:5000
       - DATABASE_URL=postgresql://postgres:password@postgres:5432/youtube_mlops
+      - REDIS_URL=redis://redis:6379/0
+      - MODEL_REGISTRY_PATH=/app/models
     depends_on:
-      - postgres
-      - mlflow
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mlflow:
+        condition: service_healthy
     volumes:
       - ../../models:/app/models
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   # Streamlit Dashboard
   dashboard:
@@ -56,8 +91,10 @@ services:
       - ../../dashboard.py:/app/dashboard.py
     working_dir: /app
     command: >
-      bash -c "pip install streamlit pandas plotly seaborn && 
+      bash -c "pip install streamlit pandas plotly seaborn requests && 
                streamlit run dashboard.py --server.port 8501 --server.address 0.0.0.0"
+    depends_on:
+      - api
 
   # Prometheus Monitoring
   prometheus:
@@ -66,9 +103,12 @@ services:
       - "9090:9090"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
 
   # Grafana Dashboards
   grafana:
@@ -79,20 +119,27 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     volumes:
       - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    depends_on:
+      - prometheus
 
   # Airflow (simplified setup)
-  airflow:
-    image: apache/airflow:2.5.0
+  airflow-webserver:
+    image: apache/airflow:2.7.0
     environment:
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql://postgres:password@postgres:5432/youtube_mlops
+      - AIRFLOW__CORE__FERNET_KEY=your_fernet_key_here
     ports:
       - "8080:8080"
     volumes:
       - ../../airflow/dags:/opt/airflow/dags
       - ../../src:/opt/airflow/dags/src
+      - ../../data:/opt/airflow/data
+      - ../../models:/opt/airflow/models
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     command: >
       bash -c "airflow db init && 
                airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@example.com &&
@@ -100,4 +147,6 @@ services:
 
 volumes:
   postgres_data:
+  redis_data:
+  prometheus_data:
   grafana_data:
