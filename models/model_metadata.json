@@ -1,0 +1,30 @@
+{
+  "model_version": "1.0.0",
+  "feature_count": 43,
+  "target_columns": [
+    "view_count",
+    "like_count",
+    "comment_count"
+  ],
+  "training_date": "2025-06-10T22:02:17.424881",
+  "model_performance": {
+    "view_count": {
+      "train_rmse": 0.002767924973527772,
+      "test_rmse": 0.21431531388611288,
+      "train_r2": 0.9999698696594922,
+      "test_r2": 0.8731560856113395
+    },
+    "like_count": {
+      "train_rmse": 0.002758931490419542,
+      "test_rmse": 0.21327728601626747,
+      "train_r2": 0.9999698095105459,
+      "test_r2": 0.8735046637989167
+    },
+    "comment_count": {
+      "train_rmse": 0.0026487998394860647,
+      "test_rmse": 0.20332473960037833,
+      "train_r2": 0.9999697866509499,
+      "test_r2": 0.8769459139004349
+    }
+  }
+}

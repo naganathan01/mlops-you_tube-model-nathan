@@ -334,5 +334,5 @@ async def log_prediction(input_data: dict, prediction_data: dict):
     logger.info(f"Prediction logged: {prediction_data['prediction_id']}")
 
 if __name__ == "__main__":
-    port = int(os.getenv("API_PORT", 8000))
+    port = int(os.getenv("API_PORT", 8080))
     uvicorn.run(app, host="0.0.0.0", port=port)
